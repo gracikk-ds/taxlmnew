@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name = "taxlm",
+    name = "taxlmnew",
     version='0.0.1',
     description = "LM for Tax forecasting",
     author = "Alex Gordeev",
