@@ -7,5 +7,4 @@ setup(
     author = "Alex Gordeev",
     author_email = "grac20101@gmail.com",
     url = "https://github.com/gracikk-finance/taxlm",
-    keywords = ["tax", "seldon", "lm"],
-    packages = ["seldon_class_tax"])
+    keywords = ["tax", "seldon", "lm"])
