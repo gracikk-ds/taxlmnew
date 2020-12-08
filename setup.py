@@ -6,7 +6,7 @@ setup(
     description = "LM for Tax forecasting",
     author = "Alex Gordeev",
     author_email = "grac20101@gmail.com",
-    url = "https://github.com/gracikk-finance/taxlm",
+    url = "https://github.com/gracikk-finance/taxlmnew",
     keywords = ["tax", "seldon", "lm"],
     packages = ["taxlm",
                "taxlm.lasthope"])
