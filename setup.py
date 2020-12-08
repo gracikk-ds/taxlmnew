@@ -2,7 +2,6 @@ from setuptools import setup
 
 setup(
     name = "module1",
-    version = "1.3.0",
     description = "LM for Tax forecasting",
     author = "Alex Gordeev",
     author_email = "grac20101@gmail.com",
