@@ -1,14 +1,12 @@
 from setuptools import setup
 
 setup(
-    name = "seldon_tax_class",
-    packages = ["module_tax"],
-    version = "1.0.2",
+    name = "module_tax",
+    version = "1.3.0",
     description = "LM for Tax forecasting",
     author = "Alex Gordeev",
     author_email = "grac20101@gmail.com",
     url = "https://github.com/gracikk-finance/module_tax",
-    download_url = "https://github.com/gracikk-finance/module_tax",
     keywords = ["tax", "seldon", "lm"],
     classifiers = [
         "Programming Language :: Python",
