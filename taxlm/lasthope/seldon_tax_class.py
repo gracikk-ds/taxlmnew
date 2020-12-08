@@ -12,15 +12,13 @@ class linear_model:
         self.data = data
         self.target_var = target_var
 
-        # self.data = self.data[(self.data <= (self.data.mean() + 2 * self.data.std())) &
-        #          (self.data >= (self.data.mean() - 2 * self.data.std()))].fillna(self.data.mean()) # [self.target_var]
-
         self.data[self.target_var] = self.data[self.target_var][
             (self.data[self.target_var] <= (self.data[self.target_var].mean() + 2 * self.data[self.target_var].std())) &
             (self.data[self.target_var] >= (
-                    self.data[self.target_var].mean() - 2 * self.data[self.target_var].std()))].fillna(
-            self.data[self.target_var].mean())  # [self.target_var]
+                        self.data[self.target_var].mean() - 2 * self.data[self.target_var].std()))]
+        print(self.data.shape)
         self.data.dropna(inplace=True)
+        print(self.data.shape)
 
     def simple_model(self, quartal=False):
         if quartal == True:
@@ -106,11 +104,11 @@ class linear_model:
         # формируем все возможные неколлинеарные последовательности признаков
         corr_table = self.data[indexes].corr()[
             ((self.data[indexes].corr() < max_col) & (self.data[indexes].corr() > -max_col)) | (
-                    self.data[indexes].corr() == 1.)]
+                        self.data[indexes].corr() == 1.)]
         combs = []
         for i in range(min_len_seq, max_len_seq + 1):
             for comb in itertools.combinations(corr_table.index.values, i):
-                if not corr_table.loc[comb, comb].isnull().any().any():
+                if corr_table.loc[comb, comb].isnull().any().any() == False:
                     comb = np.append(self.data.filter(regex=self.target_var).columns[0], np.array(comb, dtype=object))
                     combs.append(comb)  # заменил на нампай аппенд
         return combs
@@ -159,9 +157,6 @@ class linear_model:
                     max_r_2 = res.rsquared
                     self.opt_seq = list(element[1:])
 
-        # for element_1, element_2 in zip(self.list_exog, self.list_r2 ):
-        #  print('Список предикторов: {0}, R^2: {1}'.format(element_1, element_2))
-
         return self.opt_seq
 
     def regression_summary(self, exog_var_list='best_choice', size_x=15, size_y=7, p_value_max=0.05, R_2_min=.3,
@@ -174,6 +169,9 @@ class linear_model:
         import itertools
         import pandas as pd
         import matplotlib.pyplot as plt
+        from matplotlib import pylab
+        import scipy as sc
+
         ''' Строит необходимые графики и таблицы для понимания регресси по заданным параметрам
         exog_var_list - Лист наименований регрессоров (str)
         size_x - размер оси X
@@ -187,7 +185,7 @@ class linear_model:
         plt.rc('font', size=10)  # controls default text sizes
         plt.rc('axes', titlesize=10)  # fontsize of the axes title
         plt.rc('axes', labelsize=10)  # fontsize of the x and y labels
-        plt.rc('xtick', labelsize=10)  # fontsize of the tick labels
+        plt.rc('xtick', labelsize=10)  # font size of the tick labels
         plt.rc('ytick', labelsize=10)  # fontsize of the tick labels
         plt.rc('legend', fontsize=10)  # legend fontsize
         plt.rc('figure', titlesize=10)
@@ -198,7 +196,7 @@ class linear_model:
         plt.show()
 
         print('\n', '\n', 'Рисуем гистограмму распределения целевой переменной', '\n', '\n')
-        plt.figure(figsize=(15, 7))
+        plt.figure(figsize = (15, 7))
         self.data[self.target_var].plot.hist()
         plt.xlabel(self.target_var, fontsize=14)
         plt.show()
@@ -207,25 +205,24 @@ class linear_model:
         mod = sm.OLS(self.data[self.target_var], sm.add_constant(self.data[exog_var_list], prepend=False))
         fitted = mod.fit(cov_type='HC1')
         print(fitted.summary(), '\n')
-        from matplotlib import pylab
-        import scipy as sc
+
         print('\n', '\n', 'Распределение остатков', '\n', '\n')
-        plt.figure(figsize=(16, 7))
+        plt.figure(figsize = (16, 7))
         plt.subplot(121)
         sc.stats.probplot(fitted.resid, dist="norm", plot=pylab)
         plt.subplot(122)
         np.log(fitted.resid).plot.hist()
         plt.xlabel('Residuals', fontsize=14)
-        pylab.show()
+        plt.show()
         print('\n', '\n')
         print(
             'Breusch-Pagan test на гомоскедастичность: p=%f' % sms.het_breuschpagan(fitted.resid, fitted.model.exog)[1])
 
     def func_graph_pr(self, model_predict, index, data_base='kurva', model_name='Линейная модель', unit=' млрд, руб'):
-        """ Вспомогательный метод, рисует график качества на основе входных данных
+        ''' Вспомогательный метод, рисует график качества на основе входных данных
         model_predict - лист ответов регрессии
         data_base_1 - лист реальных ответов
-        model_name - наименование модели """
+        model_name - наименование модели '''
         import statsmodels.formula.api as smf
         import statsmodels.stats.api as sms
         import statsmodels.api as sm
@@ -234,6 +231,7 @@ class linear_model:
         import itertools
         import pandas as pd
         import matplotlib.pyplot as plt
+        from sklearn.metrics import mean_absolute_error
 
         sns.set(style='whitegrid')
         fig = plt.figure(figsize=(20, 10))
@@ -251,20 +249,10 @@ class linear_model:
         plt.plot(index, model_predict, "r", label="Прогноз")
         plt.fill_between(index, data_base, model_predict, facecolor='b', alpha=0.3)
         plt.legend(loc="best")
-        from sklearn.metrics import mean_absolute_error
+
         plt.title("{0}\n Средняя абсолютная ошибка {1} \n Средняя относительная ошибка {2:0.3}".format(model_name,
-                                                                                                       round(
-                                                                                                           mean_absolute_error(
-                                                                                                               model_predict,
-                                                                                                               data_base),
-                                                                                                           3),
-                                                                                                       mean_absolute_error(
-                                                                                                           model_predict,
-                                                                                                           data_base) / np.mean(
-                                                                                                           model_predict) * 100,
-                                                                                                       unit))
-        from matplotlib import rcParams
-        rcParams['axes.titlepad'] = 32
+                                                                                                round(mean_absolute_error(model_predict, data_base), 3),
+                                                                                                mean_absolute_error(model_predict, data_base) / np.mean( model_predict) * 100, unit))
 
     def linear_model_results(self, exog_var_list='best_choice', p_value_max=0.05, R_2_min=0.3, num_points=4,
                              unit=', млрд. руб', data_split=False, relative_data=False, period=1, quarter=True,
@@ -365,7 +353,6 @@ class linear_model:
                                    unit=unit, model_name='Линейная модель, тест')
 
             else:
-                print(y_train.values)
                 # Рисуем график качества
                 self.func_graph_pr(model_predict=predictions_train.values.T[0], data_base=y_train.values.T[0],
                                    index=predictions_train.index, unit=unit, model_name='Линейная модель, трейн')
@@ -413,7 +400,6 @@ class linear_model:
                 aux = pd.merge(aux, real, how='left', left_index=True, right_index=True)
                 aux.index = aux.index + pd.DateOffset(years=period)
                 aux['real_predict'] = aux[self.target_var] * aux[self.target_var + 'real']
-                print(aux['real_predict'].values)
                 # Рисуем график качества
                 self.func_graph_pr(model_predict=aux['real_predict'].values,
                                    data_base=aux[[self.target_var + 'real']].values.T[0], index=aux.index, unit=unit,
