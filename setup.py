@@ -8,5 +8,4 @@ setup(
     author_email = "grac20101@gmail.com",
     url = "https://github.com/gracikk-finance/taxlm",
     keywords = ["tax", "seldon", "lm"],
-    packages = ["taxlm",
-               "taxlm.lmforc"])
+    packages = ["taxlm"])
