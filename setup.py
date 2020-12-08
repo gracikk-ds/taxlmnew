@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = "seldon_tax_class",
-    packages = ["seldon_tax_class"],
+    packages = ["module_tax"],
     version = "1.0.2",
     description = "LM for Tax forecasting",
     author = "Alex Gordeev",
