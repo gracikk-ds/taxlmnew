@@ -22,7 +22,7 @@ class linear_model:
 
     def simple_model(self, quartal=False):
         if quartal:
-            pred = self.real_data.resample('QS', axis=0).sum()[self.target_var].copy()
+            pred = self.real_data.resample('QS', axis=0).sum()[[self.target_var]].copy()
 
             pred[self.target_var + '_return'] = pred[self.target_var] / pred[self.target_var].shift(4)
             pred[self.target_var + '_shift'] = pred[self.target_var].shift(3)
