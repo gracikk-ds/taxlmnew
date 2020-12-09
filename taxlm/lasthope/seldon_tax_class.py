@@ -327,12 +327,14 @@ class linear_model:
                 if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
+                    y_train.index = y_train.index.to_timestamp()
+                    y_test.index = y_test.index.to_timestamp()
                 else:
                     real = self.real_data.loc[:, [self.target_var]]
                 # Заводим вспомогательный датасет для графика train
                 real = real.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
-                aux_train = pd.DataFrame(index=y_train.index.to_timestamp(), data=predict_train, columns=[self.target_var], )
+                aux_train = pd.DataFrame(index=y_train.index, data=predict_train, columns=[self.target_var], )
                 aux_train.index = aux_train.index - pd.DateOffset(years=period)
                 aux_train = pd.merge(aux_train, real, how='left', left_index=True, right_index=True)
                 aux_train.index = aux_train.index + pd.DateOffset(years=period)
@@ -343,7 +345,7 @@ class linear_model:
                 # Заводим вспомогательный датасет для графика test
                 real = self.real_data.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
-                aux_test = pd.DataFrame(index=y_test.index.to_timestamp(), data=predict_test, columns=[self.target_var])
+                aux_test = pd.DataFrame(index=y_test.index, data=predict_test, columns=[self.target_var])
                 aux_test.index = aux_test.index - pd.DateOffset(years=period)
                 aux_test = pd.merge(aux_test, real, how='left', left_index=True, right_index=True)
                 aux_test.index = aux_test.index + pd.DateOffset(years=period)
