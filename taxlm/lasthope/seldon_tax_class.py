@@ -387,9 +387,13 @@ class linear_model:
 
             print(self.reg_coef)
             # Рисуем график качества
+            if quarter:
+                indexes = self.fittedvalues.index.to_timestamp()
+            else:
+                indexes = self.fittedvalues.index
             self.func_graph_pr(model_predict=self.fittedvalues.values.T[0],
                                data_base=self.data[[self.target_var]].values.T[0],
-                               index=self.fittedvalues.index.to_timestamp(), unit=unit,
+                               index=indexes, unit=unit,
                                model_name='Линейная модель')
 
             if relative_data:
