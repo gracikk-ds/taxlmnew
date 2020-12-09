@@ -398,6 +398,7 @@ class linear_model:
                 if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
+                    self.fittedvalues.index = self.fittedvalues.index.to_timestamp()
                     # real.index = real.index.to_period('Q')
 
                 else:
@@ -407,7 +408,7 @@ class linear_model:
                 real = real.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
 
-                aux = pd.DataFrame(index=self.fittedvalues.index.to_timestamp(), data=self.fittedvalues.values,
+                aux = pd.DataFrame(index=self.fittedvalues.index, data=self.fittedvalues.values,
                                    columns=[self.target_var])
                 aux.index = aux.index - pd.DateOffset(years=period)
                 aux = pd.merge(aux, real, how='left', left_index=True, right_index=True)
