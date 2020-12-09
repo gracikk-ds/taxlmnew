@@ -318,9 +318,7 @@ class linear_model:
             predictions_train.index = y_train.index
 
             # Заносим коэф-ты на трейн
-            сoef = model.coef_[0]
-            
-            self.coef_tab = pd.DataFrame(coef, index = np.array(x_train.columns), columns = ['coef'])
+            self.coef_tab = pd.DataFrame(data = model.coef_[0], index = np.array(x_train.columns), columns = ['coef'])
             print(self.coef_tab)
 
             if relative_data:
