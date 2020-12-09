@@ -363,6 +363,7 @@ class linear_model:
                 self.func_graph_pr(model_predict=aux_test['real_predict'].values,
                                    data_base=aux_test[[self.target_var + 'real']].values.T[0], index=aux_test.index,
                                    unit=unit, model_name='Линейная модель, тест')
+                return aux_train, aux_test
 
             else:
                 # Рисуем график качества
@@ -371,6 +372,7 @@ class linear_model:
                                    index=predictions_train.index, unit=unit, model_name='Линейная модель, трейн')
                 self.func_graph_pr(model_predict=predictions_test.values.T[0], data_base=y_test.values.T[0],
                                    index=predictions_test.index, unit=unit, model_name='Линейная модель, тест')
+                return predictions_train, predictions_test
 
         else:
 
@@ -421,3 +423,4 @@ class linear_model:
                 self.func_graph_pr(model_predict=aux['real_predict'].values,
                                    data_base=aux[[self.target_var + 'real']].values.T[0], index=aux.index, unit=unit,
                                    model_name='Линейная модель, трейн')
+                return aux
