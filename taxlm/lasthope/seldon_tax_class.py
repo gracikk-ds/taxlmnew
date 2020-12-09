@@ -1,28 +1,28 @@
 class linear_model:
-    ''' Перед использованием класса убедитесь, что отобраны адекватные объясняемые переменные.
+    """ Перед использованием класса убедитесь, что отобраны адекватные объясняемые переменные.
     Рост количества проверок ведет к росту ошибок 1 рода
     Принимает на вход таблицу пандас и название целевой переменной
     data - вносим данные
     real_data - вносим реальные данные, если в data внесли относительные
-    target_var - целевая переменная '''
+    target_var - целевая переменная """
 
-    def __init__(self, data, target_var, real_data='pep'):
+    def __init__(self, data, target_var, real_data='pep', drop_outl=True):
+        if drop_outl:
+            data[target_var] = data[target_var][
+                (data[target_var] <= (data[target_var].mean() + 2 * data[target_var].std())) &
+                (data[target_var] >= (data[target_var].mean() - 2 * data[target_var].std()))]
+
+            print("Удалено {0} наблюдений из {1}".format(data[target_var].shape[0] - data[target_var].dropna().shape[0],
+                                                         data[target_var].shape[0]))
+            data.dropna(inplace=True)
 
         self.real_data = real_data
         self.data = data
         self.target_var = target_var
 
-        self.data[self.target_var] = self.data[self.target_var][
-            (self.data[self.target_var] <= (self.data[self.target_var].mean() + 2 * self.data[self.target_var].std())) &
-            (self.data[self.target_var] >= (
-                        self.data[self.target_var].mean() - 2 * self.data[self.target_var].std()))]
-        print(self.data.shape)
-        self.data.dropna(inplace=True)
-        print(self.data.shape)
-
     def simple_model(self, quartal=False):
-        if quartal == True:
-            pred = (self.real_data).resample('QS', axis=0).sum()[self.target_var].copy()
+        if quartal:
+            pred = self.real_data.resample('QS', axis=0).sum()[self.target_var].copy()
 
             pred[self.target_var + '_return'] = pred[self.target_var] / pred[self.target_var].shift(4)
             pred[self.target_var + '_shift'] = pred[self.target_var].shift(3)
@@ -32,7 +32,7 @@ class linear_model:
             pred.dropna(inplace=True)
 
         else:
-            pred = (self.real_data).loc[:, [self.target_var]].copy()
+            pred = self.real_data.loc[:, [self.target_var]].copy()
             pred[self.target_var + '_return'] = pred[self.target_var] / pred[self.target_var].shift(12)
             pred[self.target_var + '_shift'] = pred[self.target_var].shift(11)
             pred[self.target_var + '_predict'] = pred[self.target_var + '_return'] * pred[self.target_var + '_shift']
@@ -43,10 +43,10 @@ class linear_model:
                            data_base=pred[self.target_var], model_name='Примитивная модель', unit=' млрд, руб')
 
     def correlation_table(self, size_x=15, size_y=7, corr_method='pearson', min_corr=0.15):
-        ''' Рисует таблицу корреляций на полученных данных
+        """ Рисует таблицу корреляций на полученных данных
         size_x - размер оси X
         size_y - размер оси Y
-        corr_method - Метод построение таблицы корреляции (дефолт = Пирсон) '''
+        corr_method - Метод построение таблицы корреляции (дефолт = Пирсон) """
         import seaborn as sns
         import numpy as np
         import pandas as pd
@@ -78,11 +78,11 @@ class linear_model:
         plt.show()
 
     def sequences_with_max_corr(self, min_corr=.3, max_col=.7, min_len_seq=3, max_len_seq=5):
-        '''функция формирует последовательности признаков для подачи в регрессию, используя таблицу корреляций
+        """функция формирует последовательности признаков для подачи в регрессию, используя таблицу корреляций
         min_corr - минимальная корреляция экзогенных переменных с эндогенной,
         max_col - максимально допустимая коллинеарность признаков
         min_len_seq - минимальная длина последовательности признаков
-        max_len_seq - максимальная длина последовательности признаков'''
+        max_len_seq - максимальная длина последовательности признаков"""
         import statsmodels.formula.api as smf
         import statsmodels.stats.api as sms
         import statsmodels.api as sm
@@ -104,7 +104,7 @@ class linear_model:
         # формируем все возможные неколлинеарные последовательности признаков
         corr_table = self.data[indexes].corr()[
             ((self.data[indexes].corr() < max_col) & (self.data[indexes].corr() > -max_col)) | (
-                        self.data[indexes].corr() == 1.)]
+                    self.data[indexes].corr() == 1.)]
         combs = []
         for i in range(min_len_seq, max_len_seq + 1):
             for comb in itertools.combinations(corr_table.index.values, i):
@@ -196,7 +196,7 @@ class linear_model:
         plt.show()
 
         print('\n', '\n', 'Рисуем гистограмму распределения целевой переменной', '\n', '\n')
-        plt.figure(figsize = (15, 7))
+        plt.figure(figsize=(15, 7))
         self.data[self.target_var].plot.hist()
         plt.xlabel(self.target_var, fontsize=14)
         plt.show()
@@ -207,7 +207,7 @@ class linear_model:
         print(fitted.summary(), '\n')
 
         print('\n', '\n', 'Распределение остатков', '\n', '\n')
-        plt.figure(figsize = (16, 7))
+        plt.figure(figsize=(16, 7))
         plt.subplot(121)
         sc.stats.probplot(fitted.resid, dist="norm", plot=pylab)
         plt.subplot(122)
@@ -219,10 +219,10 @@ class linear_model:
             'Breusch-Pagan test на гомоскедастичность: p=%f' % sms.het_breuschpagan(fitted.resid, fitted.model.exog)[1])
 
     def func_graph_pr(self, model_predict, index, data_base='kurva', model_name='Линейная модель', unit=' млрд, руб'):
-        ''' Вспомогательный метод, рисует график качества на основе входных данных
+        """ Вспомогательный метод, рисует график качества на основе входных данных
         model_predict - лист ответов регрессии
         data_base_1 - лист реальных ответов
-        model_name - наименование модели '''
+        model_name - наименование модели """
         import statsmodels.formula.api as smf
         import statsmodels.stats.api as sms
         import statsmodels.api as sm
@@ -251,8 +251,16 @@ class linear_model:
         plt.legend(loc="best")
 
         plt.title("{0}\n Средняя абсолютная ошибка {1} \n Средняя относительная ошибка {2:0.3}".format(model_name,
-                                                                                                round(mean_absolute_error(model_predict, data_base), 3),
-                                                                                                mean_absolute_error(model_predict, data_base) / np.mean( model_predict) * 100, unit))
+                                                                                                       round(
+                                                                                                           mean_absolute_error(
+                                                                                                               model_predict,
+                                                                                                               data_base),
+                                                                                                           3),
+                                                                                                       mean_absolute_error(
+                                                                                                           model_predict,
+                                                                                                           data_base) / np.mean(
+                                                                                                           model_predict) * 100,
+                                                                                                       unit))
 
     def linear_model_results(self, exog_var_list='best_choice', p_value_max=0.05, R_2_min=0.3, num_points=4,
                              unit=', млрд. руб', data_split=False, relative_data=False, period=1, quarter=True,
@@ -277,7 +285,7 @@ class linear_model:
         import matplotlib.pyplot as plt
         from sklearn.linear_model import LinearRegression
 
-        if data_split == True:
+        if data_split:
 
             # Подгружаем последовательность
             if exog_var_list == 'best_choice':
@@ -316,24 +324,26 @@ class linear_model:
             # coef_table.columns = ['lr_coef']
             # coef_table = coef_table.iloc[1:,:]
 
-            if relative_data == True:
+            if relative_data:
                 # Подгружаем датасет реальных данных
                 # Переводим значения в кварталы, если нужно
-                if quarter == True:
+                if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
                     real.index = real.index.to_period('Q')
                 else:
                     real = self.real_data.loc[:, [self.target_var]]
-
+                print(real)
                 # Заводим вспомогательный датасет для графика train
-                real = self.real_data.loc[:, [self.target_var]]
+                real = real.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
                 aux_train = pd.DataFrame(index=y_train.index, data=predict_train, columns=[self.target_var], )
                 aux_train.index = aux_train.index - pd.DateOffset(years=period)
                 aux_train = pd.merge(aux_train, real, how='left', left_index=True, right_index=True)
                 aux_train.index = aux_train.index + pd.DateOffset(years=period)
                 aux_train['real_predict'] = aux_train[self.target_var] * aux_train[self.target_var + 'real']
+                aux_train.drop(columns=[self.target_var + 'real'], inplace=True)
+                aux_train = pd.merge(aux_train, real, how='left', left_index=True, right_index=True)
 
                 # Заводим вспомогательный датасет для графика test
                 real = self.real_data.loc[:, [self.target_var]]
@@ -343,6 +353,8 @@ class linear_model:
                 aux_test = pd.merge(aux_test, real, how='left', left_index=True, right_index=True)
                 aux_test.index = aux_test.index + pd.DateOffset(years=period)
                 aux_test['real_predict'] = aux_test[self.target_var] * aux_test[self.target_var + 'real']
+                aux_test.drop(columns=[self.target_var + 'real'], inplace=True)
+                aux_test = pd.merge(aux_test, real, how='left', left_index=True, right_index=True)
 
                 # Рисуем график качества
                 self.func_graph_pr(model_predict=aux_train['real_predict'].values,
@@ -354,6 +366,7 @@ class linear_model:
 
             else:
                 # Рисуем график качества
+
                 self.func_graph_pr(model_predict=predictions_train.values.T[0], data_base=y_train.values.T[0],
                                    index=predictions_train.index, unit=unit, model_name='Линейная модель, трейн')
                 self.func_graph_pr(model_predict=predictions_test.values.T[0], data_base=y_test.values.T[0],
@@ -374,32 +387,36 @@ class linear_model:
             self.fittedvalues = pd.DataFrame(fitted.fittedvalues, columns=['fittedvalues'])
 
             print(self.reg_coef)
-
             # Рисуем график качества
             self.func_graph_pr(model_predict=self.fittedvalues.values.T[0],
-                               data_base=self.data[[self.target_var]].values.T[0], index=self.data.index, unit=unit,
+                               data_base=self.data[[self.target_var]].values.T[0],
+                               index=self.fittedvalues.index.to_timestamp(), unit=unit,
                                model_name='Линейная модель')
 
-            if relative_data == True:
+            if relative_data:
                 # Подгружаем датасет реальных данных
                 # Переводим значения в кварталы, если нужно
-                if quarter == True:
+                if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
-                    real.index = real.index.to_period('Q')
+                    # real.index = real.index.to_period('Q')
+
                 else:
                     real = self.real_data.loc[:, [self.target_var]]
 
                 # Заводим вспомогательный датасет для графика train
-                real = self.real_data.loc[:, [self.target_var]]
+                real = real.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
-                aux = pd.DataFrame(index=self.fittedvalues.index, data=self.fittedvalues.values,
+
+                aux = pd.DataFrame(index=self.fittedvalues.index.to_timestamp(), data=self.fittedvalues.values,
                                    columns=[self.target_var])
                 aux.index = aux.index - pd.DateOffset(years=period)
-
                 aux = pd.merge(aux, real, how='left', left_index=True, right_index=True)
                 aux.index = aux.index + pd.DateOffset(years=period)
                 aux['real_predict'] = aux[self.target_var] * aux[self.target_var + 'real']
+                aux.drop(columns=[self.target_var + 'real'], inplace=True)
+                aux = pd.merge(aux, real, how='left', left_index=True, right_index=True)
+
                 # Рисуем график качества
                 self.func_graph_pr(model_predict=aux['real_predict'].values,
                                    data_base=aux[[self.target_var + 'real']].values.T[0], index=aux.index, unit=unit,
