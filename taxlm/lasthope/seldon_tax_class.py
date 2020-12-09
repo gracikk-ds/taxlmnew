@@ -318,11 +318,9 @@ class linear_model:
             predictions_train.index = y_train.index
 
             # Заносим коэф-ты на трейн
-            # сoef = model.coef_[0]
-            # coef_tab = pd.DataFrame(coef, index = np.array(x_train.columns) )
-            # coef_table = pd.merge(coef_table, coef_tab, left_index=True, right_index = True, how = 'left')
-            # coef_table.columns = ['lr_coef']
-            # coef_table = coef_table.iloc[1:,:]
+            self.сoef = model.coef_[0]
+            
+            #coef_tab = pd.DataFrame(coef, index = np.array(x_train.columns), columns = ['coef'])
 
             if relative_data:
                 # Подгружаем датасет реальных данных
