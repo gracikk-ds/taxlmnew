@@ -297,9 +297,9 @@ class linear_model:
             y_train = self.data.loc[self.data.index < self.data.index[-num_points], [self.target_var]]
 
             x_train = self.data.loc[self.data.index < self.data.index[-num_points], exog_var_list]
-            x_train = statsmodels.tools.tools.add_constant(x_train, prepend=False, has_constant='skip'
+            x_train = statsmodels.tools.tools.add_constant(x_train, prepend=False, has_constant='skip')
             x_test = self.data.loc[self.data.index >= self.data.index[-num_points], exog_var_list]
-            x_test = statsmodels.tools.tools.add_constant(x_test, prepend=False, has_constant='skip'
+            x_test = statsmodels.tools.tools.add_constant(x_test, prepend=False, has_constant='skip')
 
             predictions_test = pd.DataFrame()
             predictions_train = pd.DataFrame()
