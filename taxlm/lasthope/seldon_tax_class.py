@@ -318,9 +318,10 @@ class linear_model:
             predictions_train.index = y_train.index
 
             # Заносим коэф-ты на трейн
-            self.сoef = model.coef_[0]
+            сoef = model.coef_[0]
             
-            #coef_tab = pd.DataFrame(coef, index = np.array(x_train.columns), columns = ['coef'])
+            self.coef_tab = pd.DataFrame(coef, index = np.array(x_train.columns), columns = ['coef'])
+            print(self.coef_tab)
 
             if relative_data:
                 # Подгружаем датасет реальных данных
@@ -330,7 +331,6 @@ class linear_model:
                     real = real.resample('QS', axis=0).sum()
                 else:
                     real = self.real_data.loc[:, [self.target_var]]
-                print(real)
                 # Заводим вспомогательный датасет для графика train
                 real = real.loc[:, [self.target_var]]
                 real.rename(columns={self.target_var: self.target_var + 'real'}, inplace=True)
