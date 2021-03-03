@@ -148,7 +148,7 @@ class LinearModel:
             bool_var_p = np.isin(False, np.array(res.pvalues[:-1] < p_value_max))
             bool_var_r = np.isin(False, np.array(res.rsquared > R_2_min))
             if (bool_var_p == False) & (bool_var_r == False):
-                self.list_exog = np.append(self.list_exog, list(element[1:]))
+                self.list_exog.append(list(element[1:]))
                 self.list_r2 = np.append(self.list_r2, res.rsquared)
                 print('Список предикторов: {0}, R^2: {1}'.format(list(element[1:]), res.rsquared))
                 if res.rsquared > max_r_2:
