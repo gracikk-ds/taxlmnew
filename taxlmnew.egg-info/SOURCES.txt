@@ -1,0 +1,7 @@
+setup.py
+lm_module/__init__.py
+lm_module/seldon_tax_class.py
+taxlmnew.egg-info/PKG-INFO
+taxlmnew.egg-info/SOURCES.txt
+taxlmnew.egg-info/dependency_links.txt
+taxlmnew.egg-info/top_level.txt

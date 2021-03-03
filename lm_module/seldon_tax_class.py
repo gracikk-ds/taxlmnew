@@ -212,9 +212,6 @@ class LinearModel:
         model_predict - лист ответов регрессии
         data_base_1 - лист реальных ответов
         model_name - наименование модели """
-        print(index)
-        print(data_base)
-        print(model_predict)
         sns.set(style='whitegrid')
         fig = plt.figure(figsize=(20, 10))
         plt.rc('font', size=20)  # controls default text sizes
@@ -247,7 +244,7 @@ class LinearModel:
 
     def linear_model_results(self, exog_var_list='best_choice', p_value_max=0.05, R_2_min=0.3, num_points=4,
                              unit=', млрд. руб', data_split=False, relative_data=False, period=1, quarter=True,
-                             min_corr_self=.3, max_col_self=.7):
+                             min_corr_self=.3, max_col_self=.7, func_graph=True):
         ''' Рисует график качества модели
         exog_var_list - список переменных, если best_choice, то отбирает автоматически
         p_value_max - максимум пи вэлью для отбора признаков
@@ -330,23 +327,36 @@ class LinearModel:
                 aux_test.drop(columns=[self.target_var + 'real'], inplace=True)
                 aux_test = pd.merge(aux_test, real, how='left', left_index=True, right_index=True)
 
-                # Рисуем график качества
-                self.func_graph_pr(model_predict=aux_train['real_predict'].values,
-                                   data_base=aux_train[[self.target_var + 'real']].values.T[0], index=aux_train.index,
-                                   unit=unit, model_name='Линейная модель, трейн')
-                self.func_graph_pr(model_predict=aux_test['real_predict'].values,
-                                   data_base=aux_test[[self.target_var + 'real']].values.T[0], index=aux_test.index,
-                                   unit=unit, model_name='Линейная модель, тест')
-                return aux_train, aux_test
+                mae_test = round(mean_absolute_error(aux_test['real_predict'].values,
+                                                     aux_test[[self.target_var + 'real']].values.T[0]),3)
+                mae_train = round(mean_absolute_error(aux_train['real_predict'].values,
+                                                      aux_train[[self.target_var + 'real']].values.T[0]), 3)
+
+                if func_graph:
+                    # Рисуем график качества
+                    self.func_graph_pr(model_predict=aux_train['real_predict'].values,
+                                       data_base=aux_train[[self.target_var + 'real']].values.T[0], index=aux_train.index,
+                                       unit=unit, model_name='Линейная модель, трейн')
+                    self.func_graph_pr(model_predict=aux_test['real_predict'].values,
+                                       data_base=aux_test[[self.target_var + 'real']].values.T[0], index=aux_test.index,
+                                       unit=unit, model_name='Линейная модель, тест')
+                return aux_train, aux_test, mae_test, mae_train
 
             else:
-                # Рисуем график качества
 
-                self.func_graph_pr(model_predict=predictions_train.values.T[0], data_base=y_train.values.T[0],
-                                   index=predictions_train.index, unit=unit, model_name='Линейная модель, трейн')
-                self.func_graph_pr(model_predict=predictions_test.values.T[0], data_base=y_test.values.T[0],
-                                   index=predictions_test.index, unit=unit, model_name='Линейная модель, тест')
-                return predictions_train, predictions_test
+                mae_test = round(mean_absolute_error(predictions_test.values.T[0],
+                                                     y_test.values.T[0]),3)
+                mae_train = round(mean_absolute_error(predictions_train.values.T[0],
+                                                      y_train.values.T[0]), 3)
+
+                if func_graph:
+                    # Рисуем график качества
+
+                    self.func_graph_pr(model_predict=predictions_train.values.T[0], data_base=y_train.values.T[0],
+                                       index=predictions_train.index, unit=unit, model_name='Линейная модель, трейн')
+                    self.func_graph_pr(model_predict=predictions_test.values.T[0], data_base=y_test.values.T[0],
+                                       index=predictions_test.index, unit=unit, model_name='Линейная модель, тест')
+                return predictions_train, predictions_test, mae_test, mae_train
 
         else:
 
@@ -363,18 +373,23 @@ class LinearModel:
             self.fittedvalues = pd.DataFrame(fitted.fittedvalues, columns=['fittedvalues'])
 
             print(self.reg_coef)
-            # Рисуем график качества
-            if quarter:
-                try:
-                    indexes = self.fittedvalues.index.to_timestamp()
-                except:
-                    pass
-            else:
-                indexes = self.fittedvalues.index
-            self.func_graph_pr(model_predict=self.fittedvalues.values.T[0],
-                               data_base=self.data[[self.target_var]].values.T[0],
-                               index=indexes, unit=unit,
-                               model_name='Линейная модель')
+
+            mae = round(mean_absolute_error(self.fittedvalues.values.T[0],
+                                                 self.data[[self.target_var]].values.T[0]), 3)
+
+            if func_graph:
+                # Рисуем график качества
+                if quarter:
+                    try:
+                        indexes = self.fittedvalues.index.to_timestamp()
+                    except:
+                        pass
+                else:
+                    indexes = self.fittedvalues.index
+                self.func_graph_pr(model_predict=self.fittedvalues.values.T[0],
+                                   data_base=self.data[[self.target_var]].values.T[0],
+                                   index=indexes, unit=unit,
+                                   model_name='Линейная модель')
 
             if relative_data:
                 # Подгружаем датасет реальных данных
@@ -404,8 +419,13 @@ class LinearModel:
                 aux.drop(columns=[self.target_var + 'real'], inplace=True)
                 aux = pd.merge(aux, real, how='left', left_index=True, right_index=True)
 
-                # Рисуем график качества
-                self.func_graph_pr(model_predict=aux['real_predict'].values,
-                                   data_base=aux[[self.target_var + 'real']].values.T[0], index=aux.index, unit=unit,
-                                   model_name='Линейная модель, трейн')
-                return aux
+                mae = round(mean_absolute_error(aux['real_predict'].values,
+                                                aux[[self.target_var + 'real']].values.T[0]), 3)
+
+                if func_graph:
+                    # Рисуем график качества
+                    self.func_graph_pr(model_predict=aux['real_predict'].values,
+                                       data_base=aux[[self.target_var + 'real']].values.T[0], index=aux.index, unit=unit,
+                                       model_name='Линейная модель, трейн')
+                return aux, mae
+            return mae
