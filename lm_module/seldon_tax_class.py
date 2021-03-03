@@ -1,4 +1,19 @@
-class linear_model:
+import seaborn as sns
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+import statsmodels.stats.api as sms
+import statsmodels.api as sm
+
+import itertools
+from sklearn.metrics import mean_absolute_error
+from sklearn.linear_model import LinearRegression
+from matplotlib import pylab
+import scipy as sc
+
+
+class LinearModel:
     """ Перед использованием класса убедитесь, что отобраны адекватные объясняемые переменные.
     Рост количества проверок ведет к росту ошибок 1 рода
     Принимает на вход таблицу пандас и название целевой переменной
@@ -20,8 +35,8 @@ class linear_model:
         self.data = data
         self.target_var = target_var
 
-    def simple_model(self, quartal=False):
-        if quartal:
+    def simple_model(self, quarter=False):
+        if quarter:
             pred = self.real_data.resample('QS', axis=0).sum()[[self.target_var]].copy()
 
             pred[self.target_var + '_return'] = pred[self.target_var] / pred[self.target_var].shift(4)
@@ -47,10 +62,7 @@ class linear_model:
         size_x - размер оси X
         size_y - размер оси Y
         corr_method - Метод построение таблицы корреляции (дефолт = Пирсон) """
-        import seaborn as sns
-        import numpy as np
-        import pandas as pd
-        import matplotlib.pyplot as plt
+
         # Ставим целевую переменную в первую колонку
         list_cols = self.data.columns.tolist()
         index = list_cols.index(self.target_var)
@@ -83,14 +95,7 @@ class linear_model:
         max_col - максимально допустимая коллинеарность признаков
         min_len_seq - минимальная длина последовательности признаков
         max_len_seq - максимальная длина последовательности признаков"""
-        import statsmodels.formula.api as smf
-        import statsmodels.stats.api as sms
-        import statsmodels.api as sm
-        import seaborn as sns
-        import numpy as np
-        import itertools
-        import pandas as pd
-        import matplotlib.pyplot as plt
+
         # Ставим целевую переменную в первую колонку
         list_cols = self.data.columns.tolist()
         index = list_cols.index(self.target_var)
@@ -121,14 +126,7 @@ class linear_model:
         R_2_min - минимальный R^2
         Возвращает последовательность признаков с максимальным R^2
         А также принтит R^2 для всех вошедших последовательностей'''
-        import statsmodels.formula.api as smf
-        import statsmodels.stats.api as sms
-        import statsmodels.api as sm
-        import seaborn as sns
-        import numpy as np
-        import itertools
-        import pandas as pd
-        import matplotlib.pyplot as plt
+
         # Ставим целевую переменную в первую колонку
         list_cols = self.data.columns.tolist()
         index = list_cols.index(self.target_var)
@@ -161,16 +159,6 @@ class linear_model:
 
     def regression_summary(self, exog_var_list='best_choice', size_x=15, size_y=7, p_value_max=0.05, R_2_min=.3,
                            min_corr_self=0.3, max_col_self=0.7):
-        import statsmodels.formula.api as smf
-        import statsmodels.stats.api as sms
-        import statsmodels.api as sm
-        import seaborn as sns
-        import numpy as np
-        import itertools
-        import pandas as pd
-        import matplotlib.pyplot as plt
-        from matplotlib import pylab
-        import scipy as sc
 
         ''' Строит необходимые графики и таблицы для понимания регресси по заданным параметрам
         exog_var_list - Лист наименований регрессоров (str)
@@ -192,7 +180,8 @@ class linear_model:
 
         print('\n', '\n', 'Рисуем распределение данных', '\n', '\n')
         fig = plt.figure(figsize=(size_x, size_y))
-        sns.pairplot(self.data.loc[:, exog_var_list])
+        target_var_list = [self.target_var]
+        sns.pairplot(self.data.loc[:, target_var_list.extend(exog_var_list)])
         plt.show()
 
         print('\n', '\n', 'Рисуем гистограмму распределения целевой переменной', '\n', '\n')
@@ -223,15 +212,6 @@ class linear_model:
         model_predict - лист ответов регрессии
         data_base_1 - лист реальных ответов
         model_name - наименование модели """
-        import statsmodels.formula.api as smf
-        import statsmodels.stats.api as sms
-        import statsmodels.api as sm
-        import seaborn as sns
-        import numpy as np
-        import itertools
-        import pandas as pd
-        import matplotlib.pyplot as plt
-        from sklearn.metrics import mean_absolute_error
 
         sns.set(style='whitegrid')
         fig = plt.figure(figsize=(20, 10))
@@ -247,6 +227,9 @@ class linear_model:
 
         plt.plot(index, data_base, label="Факт")
         plt.plot(index, model_predict, "r", label="Прогноз")
+        print(index)
+        print(data_base)
+        print(model_predict)
         plt.fill_between(index, data_base, model_predict, facecolor='b', alpha=0.3)
         plt.legend(loc="best")
 
@@ -275,15 +258,6 @@ class linear_model:
         relative_data - Данные представлены в относительных величинах: True/False
         period - период расчета относительных величин (нужно фиксить)
         quarter - переводить данные в кварталы True/False'''
-        import statsmodels.formula.api as smf
-        import statsmodels.stats.api as sms
-        import statsmodels.api as sm
-        import seaborn as sns
-        import numpy as np
-        import itertools
-        import pandas as pd
-        import matplotlib.pyplot as plt
-        from sklearn.linear_model import LinearRegression
 
         if data_split:
 
@@ -318,7 +292,7 @@ class linear_model:
             predictions_train.index = y_train.index
 
             # Заносим коэф-ты на трейн
-            self.coef_tab = pd.DataFrame(data = model.coef_[0], index = np.array(x_train.columns), columns = ['coef'])
+            self.coef_tab = pd.DataFrame(data = model.coef_[0], index = np.array(x_train.columns), columns=['coef'])
             print(self.coef_tab)
 
             if relative_data:
@@ -327,8 +301,11 @@ class linear_model:
                 if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
-                    y_train.index = y_train.index.to_timestamp()
-                    y_test.index = y_test.index.to_timestamp()
+                    try:
+                        y_train.index = y_train.index.to_timestamp()
+                        y_test.index = y_test.index.to_timestamp()
+                    except:
+                        pass
                 else:
                     real = self.real_data.loc[:, [self.target_var]]
                 # Заводим вспомогательный датасет для графика train
@@ -388,7 +365,10 @@ class linear_model:
             print(self.reg_coef)
             # Рисуем график качества
             if quarter:
-                indexes = self.fittedvalues.index.to_timestamp()
+                try:
+                    indexes = self.fittedvalues.index.to_timestamp()
+                except:
+                    pass
             else:
                 indexes = self.fittedvalues.index
             self.func_graph_pr(model_predict=self.fittedvalues.values.T[0],
@@ -402,7 +382,10 @@ class linear_model:
                 if quarter:
                     real = self.real_data.loc[:, [self.target_var]]
                     real = real.resample('QS', axis=0).sum()
-                    self.fittedvalues.index = self.fittedvalues.index.to_timestamp()
+                    try:
+                        self.fittedvalues.index = self.fittedvalues.index.to_timestamp()
+                    except:
+                        pass
                     # real.index = real.index.to_period('Q')
 
                 else:
