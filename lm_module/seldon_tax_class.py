@@ -212,7 +212,9 @@ class LinearModel:
         model_predict - лист ответов регрессии
         data_base_1 - лист реальных ответов
         model_name - наименование модели """
-
+        print(index)
+        print(data_base)
+        print(model_predict)
         sns.set(style='whitegrid')
         fig = plt.figure(figsize=(20, 10))
         plt.rc('font', size=20)  # controls default text sizes
@@ -227,10 +229,8 @@ class LinearModel:
 
         plt.plot(index, data_base, label="Факт")
         plt.plot(index, model_predict, "r", label="Прогноз")
-        print(index)
-        print(data_base)
-        print(model_predict)
-        plt.fill_between(index, data_base, model_predict, facecolor='b', alpha=0.3)
+
+        # plt.fill_between(index, data_base, model_predict, facecolor='b', alpha=0.3)
         plt.legend(loc="best")
 
         plt.title("{0}\n Средняя абсолютная ошибка {1} \n Средняя относительная ошибка {2:0.3}".format(model_name,
