@@ -224,6 +224,9 @@ class LinearModel:
         plt.xlabel('Ось времени')
         plt.ylabel(self.target_var + unit)
 
+        axes = plt.gca()
+        axes.set_ylim([141000, 152000])
+
         plt.plot(index, data_base, label="Факт")
         plt.plot(index, model_predict, "r", label="Прогноз")
 
