@@ -225,7 +225,7 @@ class LinearModel:
         plt.ylabel(self.target_var + unit)
 
         axes = plt.gca()
-        axes.set_ylim([100000, 152000])
+        axes.set_ylim([70000, 170000])
 
         plt.plot(index, data_base, label="Факт")
         plt.plot(index, model_predict, "r", label="Прогноз")
